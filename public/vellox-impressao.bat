@@ -22,7 +22,7 @@ if not exist "%CHROME%" (
 echo  Chrome encontrado!
 echo.
 
-set "ARGS=--kiosk-printing --app=https://www.appvellox.online/pedidos --start-maximized --disable-infobars --no-first-run"
+set "ARGS=--kiosk-printing --disable-print-preview --app=https://www.appvellox.online/pedidos --start-maximized --disable-infobars --no-first-run"
 set "DESK=%USERPROFILE%\Desktop\Vellox PDV.lnk"
 set "STARTUP=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\Vellox PDV.lnk"
 
