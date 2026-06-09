@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import Sidebar from "@/components/dashboard/Sidebar";
 import LocationProvider from "@/components/dashboard/LocationProvider";
+import PrintListener from "@/components/dashboard/PrintListener";
 import { PlanoProvider } from "@/contexts/PlanoContext";
 import { LojaProvider } from "@/contexts/LojaContext";
 import type { Plano, Loja } from "@/types";
@@ -20,7 +21,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
     const { data: empresa } = await supabase
       .from("empresas")
-      .select("id, nome, codigo, lat, lng, assinatura_ativa, assinatura_expira_em, plano")
+      .select("id, nome, cnpj, codigo, lat, lng, assinatura_ativa, assinatura_expira_em, plano")
       .eq("id", user.id)
       .single();
 
@@ -47,6 +48,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     return (
       <PlanoProvider plano={plano} assinaturaAtiva={empresa?.assinatura_ativa ?? false}>
         <LojaProvider initialLojas={lojas} empresaId={user.id}>
+          <PrintListener empresaId={empresa.id} empresaNome={empresa.nome} empresaCnpj={empresa.cnpj} />
           <div className="flex h-full" style={{ background: "var(--bg-base)" }}>
             <Sidebar
               empresaNome={empresa?.nome ?? null}

@@ -98,63 +98,94 @@ ${pedido.valor_motoboy > 0
 </body></html>`;
 }
 
-// Imprime usando beforeprint/afterprint events + window.print() síncrono.
-// Abordagem mais confiável: injeta o cupom só no momento exato da impressão,
-// evitando conflitos com router.refresh() e re-renders do React.
-// Com Chrome --kiosk-printing: totalmente silencioso.
-export function printOrder(pedido: Pedido, empresaNome?: string): boolean {
-  const data  = new Date(pedido.created_at).toLocaleString("pt-BR");
-  const total = pedido.valor_pedido + pedido.valor_motoboy;
-  const pgto  = pedido.forma_pagamento
+export function printOrder(pedido: Pedido, empresaNome?: string, empresaCnpj?: string): boolean {
+  const dataObj  = new Date(pedido.created_at);
+  const hora     = dataObj.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  const data     = dataObj.toLocaleDateString("pt-BR");
+  const total    = pedido.valor_pedido + pedido.valor_motoboy;
+  const pgto     = pedido.forma_pagamento
     ? (PGTO_LABELS[pedido.forma_pagamento] ?? pedido.forma_pagamento)
     : "—";
-  const empresa = empresaNome ?? "PEDIDO";
+  const empresa  = (empresaNome ?? "PEDIDO").toUpperCase();
+  const now      = new Date();
+  const printedAt = `${now.toLocaleDateString("pt-BR")} ${now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
 
-  // Função que alinha texto em duas colunas numa linha de N chars
-  const W = 32;
-  function row(left: string, right: string): string {
-    const space = W - left.length - right.length;
-    return left + (space > 0 ? " ".repeat(space) : " ") + right;
-  }
-  function sep(): string { return "-".repeat(W); }
-  function center(s: string): string {
-    const pad = Math.max(0, Math.floor((W - s.length) / 2));
-    return " ".repeat(pad) + s;
+  const SEP = `<div style="border-top:1px dashed #000;margin:5px 0"></div>`;
+
+  function row(left: string, right: string, bold = false): string {
+    return `<div style="display:flex;justify-content:space-between;align-items:baseline;${bold ? "font-weight:900;font-size:13px;" : ""}">
+      <span>${left}</span><span style="white-space:nowrap">${right}</span>
+    </div>`;
   }
 
-  const lines: string[] = [
-    center(empresa.toUpperCase()),
-    center(data),
-    sep(),
-    "PEDIDO: #" + pedido.id.slice(0, 8).toUpperCase(),
-    sep(),
-    "CLIENTE: " + pedido.cliente_nome,
-    ...(pedido.cliente_telefone ? ["TEL: " + pedido.cliente_telefone] : []),
-    sep(),
-    pedido.tipo_pedido === "entrega" ? "** DELIVERY **" : "** RETIRADA **",
-    ...(pedido.tipo_pedido === "entrega"
-      ? ["END: " + pedido.endereco_entrega, ...(pedido.bairro ? ["BAI: " + pedido.bairro] : [])]
-      : []),
-    sep(),
-    "ITENS:",
-    ...(pedido.descricao_itens ?? "---").split("\n"),
-    ...(pedido.observacoes ? [sep(), "OBS: " + pedido.observacoes] : []),
-    sep(),
-    row("Subtotal:", "R$ " + pedido.valor_pedido.toFixed(2).replace(".", ",")),
-    ...(pedido.valor_motoboy > 0
-      ? [row("Entrega:", "R$ " + pedido.valor_motoboy.toFixed(2).replace(".", ","))]
-      : []),
-    row("TOTAL:", "R$ " + total.toFixed(2).replace(".", ",")),
-    sep(),
-    "PGTO: " + pgto,
-    ...(pedido.troco_para ? ["Troco p/ R$ " + pedido.troco_para.toFixed(2).replace(".", ",")] : []),
-    sep(),
-    center("Vellox · appvellox.online"),
-    "",
-    "",
-  ];
+  const itensLinhas = (pedido.descricao_itens ?? "—").split("\n");
+  const itensHtml = itensLinhas
+    .map(l => `<div style="font-size:11px;line-height:1.5">${l || "&nbsp;"}</div>`)
+    .join("");
 
-  const receiptHtml = `<pre style="font-family:'Courier New',Courier,monospace;font-size:12pt;font-weight:bold;line-height:1.4;margin:0;padding:2mm;white-space:pre-wrap;word-break:break-all;color:#000">${lines.join("\n")}</pre>`;
+  const receiptHtml = `
+    <div style="font-family:'Courier New',Courier,monospace;font-size:12px;width:100%;color:#000;background:#fff;padding:3mm 2mm">
+
+      <div style="text-align:center;font-weight:900;font-size:15px;text-transform:uppercase;line-height:1.3">${empresa}</div>
+      ${empresaCnpj ? `<div style="text-align:center;font-size:10px;margin-top:2px">${empresaCnpj}</div>` : ""}
+
+      ${SEP}
+
+      <div style="text-align:center;font-weight:900;font-size:14px">PEDIDO #${pedido.id.slice(0, 8).toUpperCase()}</div>
+
+      ${SEP}
+
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-weight:900;font-size:13px">${pedido.cliente_nome}</span>
+        <span style="font-size:10px">${hora} ${data}</span>
+      </div>
+
+      ${SEP}
+
+      <div style="text-align:center;font-weight:900;font-size:15px;margin:4px 0">
+        ${pedido.tipo_pedido === "entrega" ? "ENTREGA" : "RETIRADA"}
+      </div>
+
+      ${SEP}
+
+      <div style="font-size:10px;font-weight:700;margin-bottom:1px">CLIENTE/CELULAR</div>
+      <div style="font-weight:700">${pedido.cliente_nome} - ${pedido.cliente_telefone}</div>
+
+      ${pedido.tipo_pedido === "entrega" ? `
+        <div style="font-size:10px;font-weight:700;margin-top:4px;margin-bottom:1px">ENDEREÇO DE ENTREGA:</div>
+        <div>${pedido.endereco_entrega}${pedido.bairro ? `, ${pedido.bairro}` : ""}</div>
+      ` : ""}
+
+      ${pedido.observacoes ? `
+        <div style="font-size:10px;font-weight:700;margin-top:4px;margin-bottom:1px">OBSERVAÇÕES:</div>
+        <div>${pedido.observacoes}</div>
+      ` : ""}
+
+      ${SEP}
+
+      ${itensHtml}
+
+      ${SEP}
+
+      ${row("SUBTOTAL", "R$ " + pedido.valor_pedido.toFixed(2).replace(".", ","))}
+      ${pedido.valor_motoboy > 0 ? row("TAXA DE ENTREGA", "R$ " + pedido.valor_motoboy.toFixed(2).replace(".", ",")) : ""}
+      <div style="margin-top:3px">${row("TOTAL DO PEDIDO", "R$ " + total.toFixed(2).replace(".", ","), true)}</div>
+
+      ${SEP}
+
+      <div style="font-size:10px;font-weight:700;margin-bottom:2px">TIPO DE PAGAMENTO</div>
+      <div style="display:flex;justify-content:space-between">
+        <span>${pgto}${pedido.troco_para ? ` - Troco p/ R$ ${pedido.troco_para.toFixed(2).replace(".", ",")}` : ""}</span>
+        <span>R$ ${total.toFixed(2).replace(".", ",")}</span>
+      </div>
+
+      ${SEP}
+
+      <div style="font-size:10px">IMPRESSO EM ${printedAt}</div>
+      <div style="text-align:center;font-weight:900;font-size:12px;margin-top:6px">appvellox.online</div>
+
+    </div>
+  `;
 
   try {
     // Remove instâncias anteriores
