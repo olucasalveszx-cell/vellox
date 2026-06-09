@@ -21,40 +21,38 @@ echo  Baixando servidor...
 powershell -NoProfile -Command "Invoke-WebRequest 'https://www.appvellox.online/print-server/index.js' -OutFile '%DIR%\index.js'"
 powershell -NoProfile -Command "Invoke-WebRequest 'https://www.appvellox.online/print-server/package.json' -OutFile '%DIR%\package.json'"
 
-echo  Instalando dependencias (aguarde)...
+echo  Instalando dependencias (aguarde ~1 min)...
 cd /d "%DIR%"
-npm install --quiet 2>nul
+call npm install --quiet 2>nul
 
 echo.
-echo  Baixando sua configuracao do site...
-powershell -NoProfile -Command "Invoke-WebRequest 'https://www.appvellox.online/api/print-server/config' -OutFile '%DIR%\config.json'"
-
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-  "if (-not (Test-Path '%DIR%\config.json')) { Write-Host 'ERRO: Faca login no site antes de executar este instalador.' -ForegroundColor Red; exit 1 };" ^
-  "$cfg = Get-Content '%DIR%\config.json' | ConvertFrom-Json;" ^
-  "if (-not $cfg.empresa_id) { Write-Host 'ERRO: Faca login em appvellox.online antes de instalar.' -ForegroundColor Red; Read-Host; exit 1 };" ^
+  "$pub = Invoke-WebRequest 'https://www.appvellox.online/api/print-server/public-config' | ConvertFrom-Json;" ^
   "Write-Host '';" ^
-  "Write-Host ('Empresa: ' + $cfg.empresa_nome) -ForegroundColor Green;" ^
+  "Write-Host '=== Configuracao ===' -ForegroundColor Cyan;" ^
+  "Write-Host '';" ^
+  "Write-Host 'Abra o site appvellox.online -> Configuracoes' -ForegroundColor Yellow;" ^
+  "Write-Host 'Copie o ID da empresa exibido no card de impressao.' -ForegroundColor Yellow;" ^
+  "Write-Host '';" ^
+  "$id   = Read-Host 'Cole aqui o ID da empresa';" ^
+  "$nome = Read-Host 'Nome da empresa';" ^
   "Write-Host '';" ^
   "Write-Host 'Impressoras instaladas:' -ForegroundColor Yellow;" ^
   "Get-Printer | ForEach-Object { Write-Host '  ' $_.Name };" ^
   "Write-Host '';" ^
-  "$imp = Read-Host 'Nome da impressora termica (ENTER = padrao do sistema)';" ^
-  "$cfg | Add-Member -MemberType NoteProperty -Name printer_name -Value $imp -Force;" ^
+  "$imp = Read-Host 'Nome exato da impressora termica (ENTER = padrao do sistema)';" ^
+  "$cfg = [ordered]@{ supabase_url=$pub.supabase_url; supabase_anon_key=$pub.supabase_anon_key; empresa_id=$id; empresa_nome=$nome; printer_name=$imp };" ^
   "$cfg | ConvertTo-Json | Out-File -Encoding utf8 '%DIR%\config.json';" ^
-  "('@echo off', 'cd /d C:\VelloxPrintServer', 'node index.js') -join \"`r`n\" | Out-File -Encoding ascii '%DIR%\iniciar.bat';" ^
+  "('@echo off','cd /d C:\VelloxPrintServer','node index.js') -join \"`r`n\" | Out-File -Encoding ascii '%DIR%\iniciar.bat';" ^
   "$ws = New-Object -ComObject WScript.Shell;" ^
-  "$s = $ws.CreateShortcut([Environment]::GetFolderPath('Startup') + '\Vellox Print Server.lnk');" ^
+  "$s  = $ws.CreateShortcut([Environment]::GetFolderPath('Startup') + '\Vellox Print Server.lnk');" ^
   "$s.TargetPath = '%DIR%\iniciar.bat'; $s.WindowStyle = 7; $s.Save();" ^
   "Write-Host '';" ^
   "Write-Host '==========================================' -ForegroundColor Green;" ^
-  "Write-Host '  Pronto! Servidor instalado com sucesso.' -ForegroundColor Green;" ^
-  "Write-Host '  Inicia automaticamente com o Windows.' -ForegroundColor Green;" ^
-  "Write-Host '=========================================='"
+  "Write-Host '  Instalado! Inicia automaticamente.' -ForegroundColor Green;" ^
+  "Write-Host '==========================================';"
 
 echo.
-echo  Iniciando servidor agora...
-start /min cmd /c "cd /d C:\VelloxPrintServer && node index.js"
-echo  Servidor rodando! A janela ficara minimizada.
-echo.
+echo  Iniciando servidor...
+start /min cmd /k "cd /d C:\VelloxPrintServer && node index.js"
 pause
