@@ -256,6 +256,58 @@ export default function ConfiguracoesClient({ empresa }: Props) {
         </div>
       </div>
 
+      {/* ── Servidor de impressão local ── */}
+      <div className="rounded-2xl p-5 space-y-4" style={{ background: "var(--bg-2)", border: "1px solid rgba(255,106,0,0.25)" }}>
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Printer size={15} style={{ color: "#FF6A00" }} />
+            <h2 className="text-sm font-semibold" style={{ color: "var(--text-1)" }}>Impressão automática silenciosa</h2>
+            <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "rgba(34,197,94,0.15)", color: "#22c55e" }}>RECOMENDADO</span>
+          </div>
+          <p className="text-xs" style={{ color: "#475569" }}>
+            Instale o servidor local — ele roda invisível no PC e imprime direto na térmica sem nenhum popup.
+          </p>
+        </div>
+
+        <div className="rounded-xl p-3 space-y-2" style={{ background: "var(--overlay-sm)", border: "1px solid var(--border-1)" }}>
+          <p className="text-xs font-semibold" style={{ color: "#64748b" }}>ID da sua empresa (necessário na instalação)</p>
+          <div className="flex items-center gap-2">
+            <code className="text-xs flex-1 truncate" style={{ color: "var(--text-1)" }}>{empresa.id}</code>
+            <button
+              onClick={() => copiar(empresa.id, setCopiadoCodigo)}
+              className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold"
+              style={{ background: "var(--overlay-md)", color: "#64748b" }}
+            >
+              {copiadoCodigo ? <CheckCircle size={12} style={{ color: "#22c55e" }} /> : <Copy size={12} />}
+              {copiadoCodigo ? "Copiado!" : "Copiar"}
+            </button>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          {[
+            { n: "1", label: "Baixe o instalador" },
+            { n: "2", label: "Execute e configure" },
+            { n: "3", label: "Imprime sozinho!" },
+          ].map(({ n, label }) => (
+            <div key={n} className="flex-1 rounded-xl p-3 text-center" style={{ background: "var(--overlay-sm)", border: "1px solid var(--border-1)" }}>
+              <div className="text-lg font-black mb-1" style={{ color: "#FF6A00" }}>{n}</div>
+              <p className="text-xs leading-tight" style={{ color: "#64748b" }}>{label}</p>
+            </div>
+          ))}
+        </div>
+
+        <a
+          href="/print-server/instalar.bat"
+          download="vellox-instalar-impressao.bat"
+          className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold transition-all"
+          style={{ background: "#FF6A00", color: "#fff" }}
+        >
+          <Printer size={15} />
+          Baixar instalador do servidor
+        </a>
+      </div>
+
       {/* ── Impressão silenciosa ── */}
       <div className="rounded-2xl p-5 space-y-4" style={{ background: "var(--bg-2)", border: "1px solid var(--border-1)" }}>
         <div>

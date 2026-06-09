@@ -1,0 +1,9 @@
+{
+  "name": "vellox-print-server",
+  "version": "1.0.0",
+  "description": "Servidor de impressao local Vellox",
+  "main": "index.js",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0"
+  }
+}
