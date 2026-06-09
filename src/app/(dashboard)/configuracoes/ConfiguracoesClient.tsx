@@ -256,29 +256,39 @@ export default function ConfiguracoesClient({ empresa }: Props) {
         </div>
       </div>
 
-      {/* ── Configurar impressão silenciosa ── */}
-      <div className="rounded-2xl p-5" style={{ background: "var(--bg-2)", border: "1px solid var(--border-1)" }}>
-        <div className="flex items-center gap-2 mb-1">
-          <Printer size={15} style={{ color: "#FF6A00" }} />
-          <h2 className="text-sm font-semibold" style={{ color: "var(--text-1)" }}>Impressão silenciosa (sem diálogo)</h2>
+      {/* ── Impressão silenciosa ── */}
+      <div className="rounded-2xl p-5 space-y-4" style={{ background: "var(--bg-2)", border: "1px solid var(--border-1)" }}>
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Printer size={15} style={{ color: "#FF6A00" }} />
+            <h2 className="text-sm font-semibold" style={{ color: "var(--text-1)" }}>Imprimir sem janela de confirmação</h2>
+          </div>
+          <p className="text-xs" style={{ color: "#475569" }}>
+            Configure uma vez e os cupons imprimem sozinhos, sem nenhum clique extra.
+          </p>
         </div>
-        <p className="text-xs mb-4" style={{ color: "#475569" }}>
-          Instale o atalho do Chrome com modo kiosk para imprimir automaticamente sem nenhuma janela de confirmação.
-          Funciona com qualquer impressora térmica definida como padrão no Windows.
-        </p>
-        <ol className="text-xs space-y-1 mb-4 list-decimal list-inside" style={{ color: "#64748b" }}>
-          <li>Baixe e execute o script abaixo como Administrador</li>
-          <li>Escolha sua impressora térmica na lista</li>
-          <li>Use o atalho <strong style={{ color: "var(--text-1)" }}>Vellox PDV</strong> criado na Área de Trabalho</li>
-        </ol>
+
+        <div className="flex gap-3">
+          {[
+            { n: "1", label: "Baixe o configurador" },
+            { n: "2", label: "Dê duplo clique no arquivo" },
+            { n: "3", label: 'Abra pelo atalho "Vellox PDV"' },
+          ].map(({ n, label }) => (
+            <div key={n} className="flex-1 rounded-xl p-3 text-center" style={{ background: "var(--overlay-sm)", border: "1px solid var(--border-1)" }}>
+              <div className="text-lg font-black mb-1" style={{ color: "#FF6A00" }}>{n}</div>
+              <p className="text-xs leading-tight" style={{ color: "#64748b" }}>{label}</p>
+            </div>
+          ))}
+        </div>
+
         <a
-          href="/instalar-impressao.ps1"
-          download="instalar-impressao-vellox.ps1"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all"
+          href="/vellox-impressao.bat"
+          download="vellox-impressao.bat"
+          className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-bold transition-all"
           style={{ background: "rgba(255,106,0,0.12)", color: "#FF6A00", border: "1px solid rgba(255,106,0,0.3)" }}
         >
           <Printer size={15} />
-          Baixar script de configuração (.ps1)
+          Baixar configurador
         </a>
       </div>
 
