@@ -269,25 +269,10 @@ export default function ConfiguracoesClient({ empresa }: Props) {
           </p>
         </div>
 
-        <div className="rounded-xl p-3 space-y-2" style={{ background: "var(--overlay-sm)", border: "1px solid var(--border-1)" }}>
-          <p className="text-xs font-semibold" style={{ color: "#64748b" }}>ID da sua empresa (necessário na instalação)</p>
-          <div className="flex items-center gap-2">
-            <code className="text-xs flex-1 truncate" style={{ color: "var(--text-1)" }}>{empresa.id}</code>
-            <button
-              onClick={() => copiar(empresa.id, setCopiadoCodigo)}
-              className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold"
-              style={{ background: "var(--overlay-md)", color: "#64748b" }}
-            >
-              {copiadoCodigo ? <CheckCircle size={12} style={{ color: "#22c55e" }} /> : <Copy size={12} />}
-              {copiadoCodigo ? "Copiado!" : "Copiar"}
-            </button>
-          </div>
-        </div>
-
         <div className="flex gap-2">
           {[
             { n: "1", label: "Baixe o instalador" },
-            { n: "2", label: "Execute e configure" },
+            { n: "2", label: "Execute e escolha a impressora" },
             { n: "3", label: "Imprime sozinho!" },
           ].map(({ n, label }) => (
             <div key={n} className="flex-1 rounded-xl p-3 text-center" style={{ background: "var(--overlay-sm)", border: "1px solid var(--border-1)" }}>
