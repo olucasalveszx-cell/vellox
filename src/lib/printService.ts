@@ -110,55 +110,57 @@ export function printOrder(pedido: Pedido, empresaNome?: string, empresaCnpj?: s
   const now      = new Date();
   const printedAt = `${now.toLocaleDateString("pt-BR")} ${now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
 
-  const SEP = `<div style="border-top:1px dashed #000;margin:5px 0"></div>`;
+  const B = "font-weight:900;color:#000;";
+  const SEP = `<div style="border-top:2px solid #000;margin:6px 0"></div>`;
 
-  function row(left: string, right: string, bold = false): string {
-    return `<div style="display:flex;justify-content:space-between;align-items:baseline;${bold ? "font-weight:900;font-size:13px;" : ""}">
+  function row(left: string, right: string, big = false): string {
+    const s = big ? "font-size:16px;font-weight:900;" : "font-size:14px;font-weight:700;";
+    return `<div style="display:flex;justify-content:space-between;align-items:baseline;${s}color:#000">
       <span>${left}</span><span style="white-space:nowrap">${right}</span>
     </div>`;
   }
 
   const itensLinhas = (pedido.descricao_itens ?? "—").split("\n");
   const itensHtml = itensLinhas
-    .map(l => `<div style="font-size:11px;line-height:1.5">${l || "&nbsp;"}</div>`)
+    .map(l => `<div style="font-size:14px;font-weight:700;color:#000;line-height:1.6">${l || "&nbsp;"}</div>`)
     .join("");
 
   const receiptHtml = `
-    <div style="font-family:'Courier New',Courier,monospace;font-size:12px;width:100%;color:#000;background:#fff;padding:3mm 2mm">
+    <div style="font-family:'Courier New',Courier,monospace;font-size:14px;font-weight:700;color:#000;background:#fff;padding:3mm 2mm;-webkit-print-color-adjust:exact;print-color-adjust:exact">
 
-      <div style="text-align:center;font-weight:900;font-size:15px;text-transform:uppercase;line-height:1.3">${empresa}</div>
-      ${empresaCnpj ? `<div style="text-align:center;font-size:10px;margin-top:2px">${empresaCnpj}</div>` : ""}
+      <div style="text-align:center;${B}font-size:18px;text-transform:uppercase;line-height:1.3">${empresa}</div>
+      ${empresaCnpj ? `<div style="text-align:center;font-size:12px;font-weight:700;color:#000;margin-top:2px">${empresaCnpj}</div>` : ""}
 
       ${SEP}
 
-      <div style="text-align:center;font-weight:900;font-size:14px">PEDIDO #${pedido.id.slice(0, 8).toUpperCase()}</div>
+      <div style="text-align:center;${B}font-size:17px">PEDIDO #${pedido.id.slice(0, 8).toUpperCase()}</div>
 
       ${SEP}
 
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <span style="font-weight:900;font-size:13px">${pedido.cliente_nome}</span>
-        <span style="font-size:10px">${hora} ${data}</span>
+        <span style="${B}font-size:15px">${pedido.cliente_nome}</span>
+        <span style="font-size:12px;font-weight:700;color:#000">${hora} ${data}</span>
       </div>
 
       ${SEP}
 
-      <div style="text-align:center;font-weight:900;font-size:15px;margin:4px 0">
+      <div style="text-align:center;${B}font-size:18px;margin:4px 0">
         ${pedido.tipo_pedido === "entrega" ? "ENTREGA" : "RETIRADA"}
       </div>
 
       ${SEP}
 
-      <div style="font-size:10px;font-weight:700;margin-bottom:1px">CLIENTE/CELULAR</div>
-      <div style="font-weight:700">${pedido.cliente_nome} - ${pedido.cliente_telefone}</div>
+      <div style="font-size:12px;${B}margin-bottom:2px">CLIENTE/CELULAR</div>
+      <div style="font-size:14px;${B}">${pedido.cliente_nome} - ${pedido.cliente_telefone}</div>
 
       ${pedido.tipo_pedido === "entrega" ? `
-        <div style="font-size:10px;font-weight:700;margin-top:4px;margin-bottom:1px">ENDEREÇO DE ENTREGA:</div>
-        <div>${pedido.endereco_entrega}${pedido.bairro ? `, ${pedido.bairro}` : ""}</div>
+        <div style="font-size:12px;${B}margin-top:5px;margin-bottom:2px">ENDEREÇO DE ENTREGA:</div>
+        <div style="font-size:14px;font-weight:700;color:#000">${pedido.endereco_entrega}${pedido.bairro ? `, ${pedido.bairro}` : ""}</div>
       ` : ""}
 
       ${pedido.observacoes ? `
-        <div style="font-size:10px;font-weight:700;margin-top:4px;margin-bottom:1px">OBSERVAÇÕES:</div>
-        <div>${pedido.observacoes}</div>
+        <div style="font-size:12px;${B}margin-top:5px;margin-bottom:2px">OBSERVAÇÕES:</div>
+        <div style="font-size:14px;font-weight:700;color:#000">${pedido.observacoes}</div>
       ` : ""}
 
       ${SEP}
@@ -169,20 +171,20 @@ export function printOrder(pedido: Pedido, empresaNome?: string, empresaCnpj?: s
 
       ${row("SUBTOTAL", "R$ " + pedido.valor_pedido.toFixed(2).replace(".", ","))}
       ${pedido.valor_motoboy > 0 ? row("TAXA DE ENTREGA", "R$ " + pedido.valor_motoboy.toFixed(2).replace(".", ",")) : ""}
-      <div style="margin-top:3px">${row("TOTAL DO PEDIDO", "R$ " + total.toFixed(2).replace(".", ","), true)}</div>
+      <div style="margin-top:4px">${row("TOTAL DO PEDIDO", "R$ " + total.toFixed(2).replace(".", ","), true)}</div>
 
       ${SEP}
 
-      <div style="font-size:10px;font-weight:700;margin-bottom:2px">TIPO DE PAGAMENTO</div>
-      <div style="display:flex;justify-content:space-between">
+      <div style="font-size:12px;${B}margin-bottom:3px">TIPO DE PAGAMENTO</div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;${B}">
         <span>${pgto}${pedido.troco_para ? ` - Troco p/ R$ ${pedido.troco_para.toFixed(2).replace(".", ",")}` : ""}</span>
         <span>R$ ${total.toFixed(2).replace(".", ",")}</span>
       </div>
 
       ${SEP}
 
-      <div style="font-size:10px">IMPRESSO EM ${printedAt}</div>
-      <div style="text-align:center;font-weight:900;font-size:12px;margin-top:6px">appvellox.online</div>
+      <div style="font-size:12px;font-weight:700;color:#000">IMPRESSO EM ${printedAt}</div>
+      <div style="text-align:center;${B}font-size:13px;margin-top:6px">appvellox.online</div>
 
     </div>
   `;
@@ -207,12 +209,14 @@ export function printOrder(pedido: Pedido, empresaNome?: string, empresaCnpj?: s
           color:#000!important;
           -webkit-print-color-adjust:exact!important;
           print-color-adjust:exact!important;
+          font-weight:700!important;
         }
         #${PRINT_DIV_ID} *{
           color:#000!important;
           background:#fff!important;
           -webkit-print-color-adjust:exact!important;
           print-color-adjust:exact!important;
+          font-weight:700!important;
         }
       }
     `;
