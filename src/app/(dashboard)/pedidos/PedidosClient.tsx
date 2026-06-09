@@ -267,22 +267,6 @@ export default function PedidosClient({ pedidos: initial, empresaId, empresaNome
   const [newOrderBanner,   setNewOrderBanner]   = useState<NewOrderBanner | null>(null);
   const [highlightedOrders, setHighlightedOrders] = useState<Set<string>>(new Set());
   const [printToast,        setPrintToast]        = useState<{ ok: boolean; msg: string } | null>(null);
-  const [autoPrintPedido,   setAutoPrintPedido]   = useState<Pedido | null>(null);
-
-  // Dispara window.print() via useEffect — fora do callback do WebSocket
-  useEffect(() => {
-    if (!autoPrintPedido) return;
-    const pedido = autoPrintPedido;
-    setAutoPrintPedido(null);
-    const ok = printService.printOrder(pedido, empresaNome);
-    if (ok) {
-      setPrintToast({ ok: true, msg: "Impressão iniciada!" });
-      setTimeout(() => setPrintToast(null), 4000);
-    } else {
-      setPrintToast({ ok: false, msg: "Falha ao imprimir" });
-      setTimeout(() => setPrintToast(null), 4000);
-    }
-  }, [autoPrintPedido]); // eslint-disable-line
 
   // Cria AudioContext no mount e desbloqueia na primeira interação do usuário
   useEffect(() => {
@@ -640,12 +624,6 @@ export default function PedidosClient({ pedidos: initial, empresaId, empresaNome
           setTimeout(() => {
             setHighlightedOrders(prev => { const n = new Set(prev); n.delete(novo.id); return n; });
           }, 60_000);
-          // Auto-print via estado React (useEffect garante execução fora do WebSocket)
-          try {
-            if (localStorage.getItem("vellox-autoprint-ativo") === "1") {
-              setAutoPrintPedido(novo);
-            }
-          } catch { /* localStorage indisponível */ }
         }
         router.refresh();
       })
