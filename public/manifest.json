@@ -1,0 +1,14 @@
+{
+  "name": "Vellox — Gestão de Entregas",
+  "short_name": "Vellox",
+  "description": "Sistema de gestão de motoboys e pedidos em tempo real",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0a0a0a",
+  "theme_color": "#ef4444",
+  "icons": [
+    { "src": "/%C3%ADcone.png", "sizes": "any", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
